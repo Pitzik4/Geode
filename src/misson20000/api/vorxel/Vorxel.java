@@ -38,7 +38,7 @@ public class Vorxel {
 		}
 		Display.update();
 		if(Display.isCloseRequested()) {
-			game.shutdown();
+			game.close();
 			Display.destroy();
 			System.exit(0);
 		}
