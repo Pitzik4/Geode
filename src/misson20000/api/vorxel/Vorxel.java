@@ -4,6 +4,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
+import pitzik4.geode.Geode;
+
 public class Vorxel {
 	private static Geode game;
 
