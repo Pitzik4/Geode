@@ -5,9 +5,9 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
 public class Vorxel {
-	private static Game game;
+	private static Geode game;
 
-	public static void init(Settings set, Game gamep) {
+	public static void init(Settings set, Geode gamep) {
 		game = gamep;
 		try {
 			Display.setDisplayMode(new DisplayMode(set.width,set.height));
