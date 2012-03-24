@@ -31,5 +31,10 @@ public class Vorxel {
 			game.tick();
 		}
 		Display.update();
+		if(Display.isCloseRequested()) {
+			game.close();
+			Display.destroy();
+			System.exit(0);
+		}
 	}
 }
