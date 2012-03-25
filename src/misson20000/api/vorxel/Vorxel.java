@@ -3,9 +3,8 @@ package misson20000.api.vorxel;
 import java.io.IOException;
 import java.util.Random;
 
+import misson20000.api.vorxel.cubes.Cube;
 import misson20000.api.vorxel.renders.Render;
-import misson20000.api.vorxel.renders.RenderGrass;
-import misson20000.api.vorxel.renders.RenderStandardCube;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -15,37 +14,34 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
-import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import pitzik4.geode.Geode;
 
 public class Vorxel {
-	public static final Render renderStandardCube = new RenderStandardCube();
-	private static final Cube testCube = new Cube();
 	private static Geode game;
-	private static Texture tex;
 	private static Vector3f pos;
 	private static boolean exit;
 	private static float pitch;
 	private static float yaw;
-	public static Render renderGrass = new RenderGrass();
-	private static Cube grass = new CubeGrass();
 	public static float windz = 0.1f;
 	public static float windx = 0.1f;
+	@SuppressWarnings("unused")
 	private static float tarwinz = 0.4f;;
+	@SuppressWarnings("unused")
 	private static float tarwinx = 0.4f;
+	@SuppressWarnings("unused")
 	private static Random random = new Random();
 	private static World world;
 
 	public static void init(VorxelSettings set, Geode gamep) {
 		world = new World();
+		world.createSpawn();
 		pos = world.getStartingPosition();
 		game = gamep;
 		try {
 	        DisplayMode d[] = Display.getAvailableDisplayModes();
 	        DisplayMode displayMode = d[0];
-			//Display.setDisplayMode(new DisplayMode(set.width,set.height));
 	        Display.setDisplayMode(displayMode);
 			Display.create();
 			
@@ -72,9 +68,9 @@ public class Vorxel {
 	        // Really Nice Perspective Calculations
 	        GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 	        
-	        Vorxel.testCube.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/dirt.png"));
-	        Vorxel.grass.texture = Vorxel.testCube.texture;
-	        Vorxel.grass.toptexture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/grass.png"));
+	        Cube.dirt.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/dirt.png"));
+	        Cube.grass.texture = Cube.dirt.texture;
+	        Cube.grass.toptexture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/grass.png"));
 
 		} catch (LWJGLException e) {
 			// TODO Auto-generated catch block
@@ -88,6 +84,9 @@ public class Vorxel {
 	public static void yaw(float amount)
 	{
 	    yaw += amount;
+	    if(yaw < 0) {
+	    	yaw-= amount;
+	    }
 	}
 	 
 	public static void pitch(float amount)
@@ -133,32 +132,35 @@ public class Vorxel {
 		Mouse.setGrabbed(true);
 
 		if(Display.isCreated()) {
-			render();
+			if (Keyboard.isKeyDown(Keyboard.KEY_W))
+	        {
+	            walkForward(world.movespeed);
+	        }
+	        if (Keyboard.isKeyDown(Keyboard.KEY_S))
+	        {
+	            walkBackwards(world.movespeed);
+	        }
+	        if (Keyboard.isKeyDown(Keyboard.KEY_A))
+	        {
+	            strafeLeft(world.movespeed);
+	        }
+	        if (Keyboard.isKeyDown(Keyboard.KEY_D))
+	        {
+	            strafeRight(world.movespeed);
+	        }
+	        if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+	        	exit = true;
+	        }
+	        if(!world.getCubeAt(0-Math.floor(pos.x), 0-(Math.floor(pos.y)+2), 0-Math.floor(pos.z)).isSolid()) {
+	        	pos.y += 0.2;
+	        }
 			Display.update();
+			render();
 			if(Display.isCloseRequested() || exit) {
 				game.close();
 				Display.destroy();
 			}
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_W))
-        {
-            walkForward(world.movespeed);
-        }
-        if (Keyboard.isKeyDown(Keyboard.KEY_S))
-        {
-            walkBackwards(world.movespeed);
-        }
-        if (Keyboard.isKeyDown(Keyboard.KEY_A))
-        {
-            strafeLeft(world.movespeed);
-        }
-        if (Keyboard.isKeyDown(Keyboard.KEY_D))
-        {
-            strafeRight(world.movespeed);
-        }
-        if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-        	exit = true;
-        }
 	}
 
 	private static void render() {
@@ -171,15 +173,7 @@ public class Vorxel {
 
 		lookThrough();
 
-		Render.renderCube(Vorxel.testCube);
-		GL11.glTranslatef(0, 1, 0);
-		Render.renderCube(Vorxel.grass);
-		GL11.glTranslatef(1, 0, 0);
-		Render.renderCube(Vorxel.grass);
-		GL11.glTranslatef(1, 0, 0);
-		Render.renderCube(Vorxel.grass);
-		GL11.glTranslatef(1, 0, 0);
-		Render.renderCube(Vorxel.grass);
+		Render.renderArray(world.getSpawn());
 		
 		GL11.glLoadIdentity();
 

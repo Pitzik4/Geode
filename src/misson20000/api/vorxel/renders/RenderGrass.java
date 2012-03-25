@@ -5,8 +5,8 @@ import static org.lwjgl.opengl.GL11.glVertex3f;
 
 import org.lwjgl.opengl.GL11;
 
-import misson20000.api.vorxel.Cube;
 import misson20000.api.vorxel.Vorxel;
+import misson20000.api.vorxel.cubes.Cube;
 
 public class RenderGrass extends RenderStandardCube {
 

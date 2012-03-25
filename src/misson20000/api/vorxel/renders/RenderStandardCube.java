@@ -3,14 +3,10 @@ package misson20000.api.vorxel.renders;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
-import misson20000.api.vorxel.Cube;
+import misson20000.api.vorxel.cubes.Cube;
 
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.opengl.Texture;
 public class RenderStandardCube extends Render {
-
-	private Texture tex;
-
 	@Override
 	public void render(Cube c) {
 		GL11.glColor3f(1, 0, 0);

@@ -18,6 +18,7 @@ public class Geode implements Tickable, Runnable {
 	 */
 	public static void main(String[] args) {
 		Geode game = new Geode();
+	
 		new Thread(game).start();
 	}
 	@Override
