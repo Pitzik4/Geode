@@ -1,10 +1,14 @@
 package misson20000.api.vorxel;
 
+import java.io.IOException;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
 
 import pitzik4.geode.Geode;
 
@@ -12,6 +16,7 @@ public class Vorxel {
 	public static final Render renderStandardCube = new RenderStandardCube();
 	private static final Cube testCube = new Cube();
 	private static Geode game;
+	private static Texture tex;
 
 	public static void init(VorxelSettings set, Geode gamep) {
 		game = gamep;
@@ -41,7 +46,11 @@ public class Vorxel {
 
 	        // Really Nice Perspective Calculations
 	        GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
+	        Vorxel.testCube.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/texture.png"));
 		} catch (LWJGLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -65,9 +74,19 @@ public class Vorxel {
 		
 		GLU.gluLookAt(0, 0, 0, 0, 0, 0, 0, 1, 0);
 		//tesetRender();
+	
 		GL11.glLoadIdentity();
 		GL11.glTranslatef(0, 0, -6);
+		GL11.glRotated(-45, 1, 1, 1);
 		Render.renderCube(Vorxel.testCube);
+		
+		GL11.glLoadIdentity();
+		GL11.glTranslatef(-1, 1, -6);
+		GL11.glRotated(-45, 1, 1, 1);
+		Render.renderCube(Vorxel.testCube);
+		
+		GL11.glLoadIdentity();
+
 	}
 
 	private static void tesetRender() {
