@@ -14,6 +14,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
+import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
@@ -24,21 +25,22 @@ public class Vorxel {
 	private static final Cube testCube = new Cube();
 	private static Geode game;
 	private static Texture tex;
-	private static float x;
-	private static float z;
-	private static int rot;
+	private static Vector3f pos;
 	private static boolean exit;
-	private static int xrot;
-	private static int yrot;
+	private static float pitch;
+	private static float yaw;
 	public static Render renderGrass = new RenderGrass();
 	private static Cube grass = new CubeGrass();
 	public static float windz = 0.1f;
 	public static float windx = 0.1f;
 	private static float tarwinz = 0.4f;;
 	private static float tarwinx = 0.4f;
-
+	private static Random random = new Random();
+	private static World world;
 
 	public static void init(VorxelSettings set, Geode gamep) {
+		world = new World();
+		pos = world.getStartingPosition();
 		game = gamep;
 		try {
 	        DisplayMode d[] = Display.getAvailableDisplayModes();
@@ -83,32 +85,54 @@ public class Vorxel {
 		}
 	}
 
-	private static Random random = new Random();
-
+	public static void yaw(float amount)
+	{
+	    yaw += amount;
+	}
+	 
+	public static void pitch(float amount)
+	{
+	    pitch += amount;
+	}
+	
+	public static void walkForward(float distance)
+	{
+	    pos.x -= distance * (float)Math.sin(Math.toRadians(yaw));
+	    pos.z += distance * (float)Math.cos(Math.toRadians(yaw));
+	}
+	 
+	public static void walkBackwards(float distance)
+	{
+	    pos.x += distance * (float)Math.sin(Math.toRadians(yaw));
+	    pos.z -= distance * (float)Math.cos(Math.toRadians(yaw));
+	}
+	 
+	public static void strafeLeft(float distance)
+	{
+	    pos.x -= distance * (float)Math.sin(Math.toRadians(yaw-90));
+	    pos.z += distance * (float)Math.cos(Math.toRadians(yaw-90));
+	}
+	 
+	public static void strafeRight(float distance)
+	{
+	    pos.x -= distance * (float)Math.sin(Math.toRadians(yaw+90));
+	    pos.z += distance * (float)Math.cos(Math.toRadians(yaw+90));
+	}
+	
+    public static void lookThrough()
+    {
+        GL11.glRotatef(pitch, 1.0f, 0.0f, 0.0f);
+        GL11.glRotatef(yaw, 0.0f, 1.0f, 0.0f);
+        GL11.glTranslatef(pos.x, pos.y, pos.z);
+    }
+    
 	public static void tick() {
+		yaw(Mouse.getDX());
+		pitch(0-Mouse.getDY());
+		//Mouse.setCursorPosition(Display.getWidth()/2, Display.getHeight()/2);
+		Mouse.setGrabbed(true);
+
 		if(Display.isCreated()) {
-			double xrotrads = Math.toRadians(xrot);
-			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				x += 1;
-				z += 1;
-			}
-			if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				z -= 1;
-				x -= 1;
-			}
-			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				x++;
-			}
-			if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				x--;
-			}
-			if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-				exit = true;
-			}
-			
-			windx = Mouse.getX()/ 100;
-			windz = Mouse.getY() / 100;
-			Mouse.setClipMouseCoordinatesToWindow(true);
 			render();
 			Display.update();
 			if(Display.isCloseRequested() || exit) {
@@ -116,28 +140,37 @@ public class Vorxel {
 				Display.destroy();
 			}
 		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_W))
+        {
+            walkForward(world.movespeed);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_S))
+        {
+            walkBackwards(world.movespeed);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_A))
+        {
+            strafeLeft(world.movespeed);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_D))
+        {
+            strafeRight(world.movespeed);
+        }
+        if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+        	exit = true;
+        }
 	}
 
 	private static void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
 		// set the color of the quad (R,G,B,A)
 		GL11.glColor3f(0.5f,0.5f,1.0f);
-		
-		//tesetRender();
+
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glLoadIdentity();
-		GLU.gluLookAt(x, 0 , z, 0, 0, 0, 0, 1, 0);
-		//Move to camera		//GL11.glTranslatef(x, 0, z);
-		//Rotate camera
-		//GL11.glRotated(0 + xrot, 0, 1, 0);
-		//Move to 
-		//GL11.glTranslatef(x + x, 0, z + z);
-		//GL11.glRotated(0 + yrot, 1, 0, 0);
-		//GLU.gluLookAt(x, 0, z, 0, 0, 0, 0, 1, 0);
-		GL11.glRotatef(45, 0, 1, 1);
-		GL11.glRotatef(-45, 1, 0, 0);
 
-		GL11.glTranslatef(0, 0, -6);
+		lookThrough();
+
 		Render.renderCube(Vorxel.testCube);
 		GL11.glTranslatef(0, 1, 0);
 		Render.renderCube(Vorxel.grass);
@@ -151,44 +184,5 @@ public class Vorxel {
 		GL11.glLoadIdentity();
 
 	}
-
-	private static void tesetRender() {
-		System.out.println("Render");
-		GL11.glLoadIdentity();                          // Reset The Current Modelview Matrix
-        GL11.glTranslatef(1.5f,0.0f,-7.0f);             // Move Right 1.5 Units And Into The Screen 6.0
-        //GL11.glRotatef(rquad,1.0f,1.0f,1.0f);               // Rotate The Quad On The X axis ( NEW )
-        GL11.glColor3f(0.5f,0.5f,1.0f);                 // Set The Color To Blue One Time Only
-        GL11.glBegin(GL11.GL_QUADS);                        // Draw A Quad
-            GL11.glColor3f(0.0f,1.0f,0.0f);             // Set The Color To Green
-            GL11.glVertex3f( 1.0f, 1.0f,-1.0f);         // Top Right Of The Quad (Top)
-            GL11.glVertex3f(-1.0f, 1.0f,-1.0f);         // Top Left Of The Quad (Top)
-            GL11.glVertex3f(-1.0f, 1.0f, 1.0f);         // Bottom Left Of The Quad (Top)
-            GL11.glVertex3f( 1.0f, 1.0f, 1.0f);         // Bottom Right Of The Quad (Top)
-            GL11.glColor3f(1.0f,0.5f,0.0f);             // Set The Color To Orange
-            GL11.glVertex3f( 1.0f,-1.0f, 1.0f);         // Top Right Of The Quad (Bottom)
-            GL11.glVertex3f(-1.0f,-1.0f, 1.0f);         // Top Left Of The Quad (Bottom)
-            GL11.glVertex3f(-1.0f,-1.0f,-1.0f);         // Bottom Left Of The Quad (Bottom)
-            GL11.glVertex3f( 1.0f,-1.0f,-1.0f);         // Bottom Right Of The Quad (Bottom)
-            GL11.glColor3f(1.0f,0.0f,0.0f);             // Set The Color To Red
-            GL11.glVertex3f( 1.0f, 1.0f, 1.0f);         // Top Right Of The Quad (Front)
-            GL11.glVertex3f(-1.0f, 1.0f, 1.0f);         // Top Left Of The Quad (Front)
-            GL11.glVertex3f(-1.0f,-1.0f, 1.0f);         // Bottom Left Of The Quad (Front)
-            GL11.glVertex3f( 1.0f,-1.0f, 1.0f);         // Bottom Right Of The Quad (Front)
-            GL11.glColor3f(1.0f,1.0f,0.0f);             // Set The Color To Yellow
-            GL11.glVertex3f( 1.0f,-1.0f,-1.0f);         // Bottom Left Of The Quad (Back)
-            GL11.glVertex3f(-1.0f,-1.0f,-1.0f);         // Bottom Right Of The Quad (Back)
-            GL11.glVertex3f(-1.0f, 1.0f,-1.0f);         // Top Right Of The Quad (Back)
-            GL11.glVertex3f( 1.0f, 1.0f,-1.0f);         // Top Left Of The Quad (Back)
-            GL11.glColor3f(0.0f,0.0f,1.0f);             // Set The Color To Blue
-            GL11.glVertex3f(-1.0f, 1.0f, 1.0f);         // Top Right Of The Quad (Left)
-            GL11.glVertex3f(-1.0f, 1.0f,-1.0f);         // Top Left Of The Quad (Left)
-            GL11.glVertex3f(-1.0f,-1.0f,-1.0f);         // Bottom Left Of The Quad (Left)
-            GL11.glVertex3f(-1.0f,-1.0f, 1.0f);         // Bottom Right Of The Quad (Left)
-            GL11.glColor3f(1.0f,0.0f,1.0f);             // Set The Color To Violet
-            GL11.glVertex3f( 1.0f, 1.0f,-1.0f);         // Top Right Of The Quad (Right)
-            GL11.glVertex3f( 1.0f, 1.0f, 1.0f);         // Top Left Of The Quad (Right)
-            GL11.glVertex3f( 1.0f,-1.0f, 1.0f);         // Bottom Left Of The Quad (Right)
-            GL11.glVertex3f( 1.0f,-1.0f,-1.0f);         // Bottom Right Of The Quad (Right)
-        GL11.glEnd();                                       // Done Drawing The Quad
-	}
 }
+
