@@ -1,8 +1,15 @@
 package misson20000.api.vorxel;
 
 import java.io.IOException;
+import java.util.Random;
+
+import misson20000.api.vorxel.renders.Render;
+import misson20000.api.vorxel.renders.RenderGrass;
+import misson20000.api.vorxel.renders.RenderStandardCube;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -17,6 +24,19 @@ public class Vorxel {
 	private static final Cube testCube = new Cube();
 	private static Geode game;
 	private static Texture tex;
+	private static float x;
+	private static float z;
+	private static int rot;
+	private static boolean exit;
+	private static int xrot;
+	private static int yrot;
+	public static Render renderGrass = new RenderGrass();
+	private static Cube grass = new CubeGrass();
+	public static float windz = 0.1f;
+	public static float windx = 0.1f;
+	private static float tarwinz = 0.4f;;
+	private static float tarwinx = 0.4f;
+
 
 	public static void init(VorxelSettings set, Geode gamep) {
 		game = gamep;
@@ -26,6 +46,9 @@ public class Vorxel {
 			//Display.setDisplayMode(new DisplayMode(set.width,set.height));
 	        Display.setDisplayMode(displayMode);
 			Display.create();
+			
+			Mouse.create();
+			Keyboard.create();
 			
 	        GL11.glEnable(GL11.GL_TEXTURE_2D); // Enable Texture Mapping
 	        GL11.glShadeModel(GL11.GL_SMOOTH); // Enable Smooth Shading
@@ -46,7 +69,11 @@ public class Vorxel {
 
 	        // Really Nice Perspective Calculations
 	        GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
-	        Vorxel.testCube.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/texture.png"));
+	        
+	        Vorxel.testCube.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/dirt.png"));
+	        Vorxel.grass.texture = Vorxel.testCube.texture;
+	        Vorxel.grass.toptexture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/grass.png"));
+
 		} catch (LWJGLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,11 +83,35 @@ public class Vorxel {
 		}
 	}
 
+	private static Random random = new Random();
+
 	public static void tick() {
 		if(Display.isCreated()) {
+			double xrotrads = Math.toRadians(xrot);
+			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
+				x += 1;
+				z += 1;
+			}
+			if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
+				z -= 1;
+				x -= 1;
+			}
+			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+				x++;
+			}
+			if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
+				x--;
+			}
+			if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+				exit = true;
+			}
+			
+			windx = Mouse.getX()/ 100;
+			windz = Mouse.getY() / 100;
+			Mouse.setClipMouseCoordinatesToWindow(true);
 			render();
 			Display.update();
-			if(Display.isCloseRequested()) {
+			if(Display.isCloseRequested() || exit) {
 				game.close();
 				Display.destroy();
 			}
@@ -72,18 +123,30 @@ public class Vorxel {
 		// set the color of the quad (R,G,B,A)
 		GL11.glColor3f(0.5f,0.5f,1.0f);
 		
-		GLU.gluLookAt(0, 0, 0, 0, 0, 0, 0, 1, 0);
 		//tesetRender();
-	
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glLoadIdentity();
+		GLU.gluLookAt(x, 0 , z, 0, 0, 0, 0, 1, 0);
+		//Move to camera		//GL11.glTranslatef(x, 0, z);
+		//Rotate camera
+		//GL11.glRotated(0 + xrot, 0, 1, 0);
+		//Move to 
+		//GL11.glTranslatef(x + x, 0, z + z);
+		//GL11.glRotated(0 + yrot, 1, 0, 0);
+		//GLU.gluLookAt(x, 0, z, 0, 0, 0, 0, 1, 0);
+		GL11.glRotatef(45, 0, 1, 1);
+		GL11.glRotatef(-45, 1, 0, 0);
+
 		GL11.glTranslatef(0, 0, -6);
-		GL11.glRotated(-45, 1, 1, 1);
 		Render.renderCube(Vorxel.testCube);
-		
-		GL11.glLoadIdentity();
-		GL11.glTranslatef(-1, 1, -6);
-		GL11.glRotated(-45, 1, 1, 1);
-		Render.renderCube(Vorxel.testCube);
+		GL11.glTranslatef(0, 1, 0);
+		Render.renderCube(Vorxel.grass);
+		GL11.glTranslatef(1, 0, 0);
+		Render.renderCube(Vorxel.grass);
+		GL11.glTranslatef(1, 0, 0);
+		Render.renderCube(Vorxel.grass);
+		GL11.glTranslatef(1, 0, 0);
+		Render.renderCube(Vorxel.grass);
 		
 		GL11.glLoadIdentity();
 
