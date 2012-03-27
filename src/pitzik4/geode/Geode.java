@@ -2,6 +2,8 @@ package pitzik4.geode;
 
 import java.util.logging.Logger;
 
+import org.lwjgl.util.vector.Vector3f;
+
 import misson20000.api.vorxel.VorxelSettings;
 import misson20000.api.vorxel.Vorxel;
 
@@ -11,6 +13,7 @@ public class Geode implements Tickable, Runnable {
 	public long lifeTime = 0;
 	private int frames = 0;
 	public Logger log = Logger.getLogger("Geode");
+	private PlayerController pcont = new PlayerController(this);
 	public static final double TICKS_PER_MILLI = 20.0 / 1000.0;
 
 	/**
@@ -18,11 +21,11 @@ public class Geode implements Tickable, Runnable {
 	 */
 	public static void main(String[] args) {
 		Geode game = new Geode();
-	
 		new Thread(game).start();
 	}
 	@Override
 	public void tick() {
+		pcont.tick();
 		Vorxel.tick();
 		ticks++;
 		lifeTime++;
@@ -30,9 +33,13 @@ public class Geode implements Tickable, Runnable {
 	public void close() {
 		closing = true;
 	}
+	public void render() {
+		frames++;
+	}
 	@Override
 	public void run() {
 		Vorxel.init(new VorxelSettings(), this);
+		pcont.goTo(new Vector3f(0, -5, 0), 0, 0);
 		long time = System.currentTimeMillis();
 		long lastTime = time;
 		long slowness = 0;
@@ -42,6 +49,7 @@ public class Geode implements Tickable, Runnable {
 			time = System.currentTimeMillis();
 			slowness = time - lastTime;
 			lastTime = time;
+			Vorxel.render();
 			catchup += ((double) slowness) * TICKS_PER_MILLI;
 			while(catchup >= 1.0) {
 				tick();
@@ -58,6 +66,9 @@ public class Geode implements Tickable, Runnable {
 			} catch (InterruptedException e) {}
 		}
 		System.exit(0);
+	}
+	public PlayerController getPlayerController() {
+		return pcont;
 	}
 	
 }
