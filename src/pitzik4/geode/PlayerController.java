@@ -30,8 +30,21 @@ public class PlayerController implements Tickable {
 		if(Control.MOVE_RIGHT.isDown()) {
 			strafeRight(WALK_SPEED);
 		}
+		if(Control.MOVE_DOWN.isDown()) {
+			moveDown(WALK_SPEED);
+		}
+		if(Control.MOVE_UP.isDown()) {
+			moveUp(WALK_SPEED);
+		}
 	}
 	
+	private void moveDown(float speed) {
+		pos.y -= speed;
+	}
+	private void moveUp(float speed) {
+		pos.y += speed;
+	}
+
 	public void yaw(float amount)
 	{
 	    yaw += amount;

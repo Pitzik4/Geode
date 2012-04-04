@@ -7,7 +7,9 @@ public enum Control {
 	MOVE_RIGHT (Keyboard.KEY_D),
 	MOVE_FORWARD (Keyboard.KEY_W),
 	MOVE_BACK (Keyboard.KEY_S),
-	JUMP (Keyboard.KEY_SPACE);
+	JUMP (Keyboard.KEY_SPACE),
+	MOVE_DOWN (Keyboard.KEY_E),
+	MOVE_UP (Keyboard.KEY_Q);
 	
 	private int keyValue;
 	

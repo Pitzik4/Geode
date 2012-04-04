@@ -14,7 +14,7 @@ public class RenderGrass extends RenderStandardCube {
 	public void render(Cube c) {
 		// TODO Auto-generated method stub
 		GL11.glColor3f(1, 1, 1);
-		
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		c.toptexture.bind();
 		GL11.glBegin(GL11.GL_QUADS);
 			renderTopFace();
