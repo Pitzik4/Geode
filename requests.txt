@@ -1,3 +1,5 @@
 Pitzik4:
-Make textures
+OpenGL PICKING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Make textures!!!
 Set up wind
+AI
