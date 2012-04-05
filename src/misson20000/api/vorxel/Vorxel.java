@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import pitzik4.geode.Geode;
@@ -71,15 +72,13 @@ public class Vorxel {
 
 	        // Really Nice Perspective Calculations
 	        GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
-	        
-	        Cube.dirt.texture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/dirt.png"));
+	        TextureHelper.init();
+	        Cube.dirt.texture = new VTex(4);
 	        Cube.grass.texture = Cube.dirt.texture;
-	        Cube.grass.toptexture = TextureLoader.getTexture("PNG", Geode.class.getResourceAsStream("/grass.png"));
+	        Cube.grass.toptexture = new VTex(1);
 			Mouse.setGrabbed(true);
 			world.createSpawn();
 		} catch (LWJGLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
